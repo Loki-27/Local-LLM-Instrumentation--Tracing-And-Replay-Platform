@@ -1,15 +1,27 @@
 [
 {
   "directory": "/Users/indr/llm-tracer/build",
-  "command": "/usr/bin/c++  -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/tracer_core.dir/src/core/layer_event.cpp.o -c /Users/indr/llm-tracer/src/core/layer_event.cpp",
+  "command": "/usr/bin/c++ -DGGML_BACKEND_SHARED -DGGML_SHARED -DGGML_USE_BLAS -DGGML_USE_CPU -DGGML_USE_METAL -DLLAMA_SHARED -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -I/Users/indr/llm-tracer/extern/llama.cpp/src/../include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/src/../include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/tracer_core.dir/src/core/layer_event.cpp.o -c /Users/indr/llm-tracer/src/core/layer_event.cpp",
   "file": "/Users/indr/llm-tracer/src/core/layer_event.cpp",
   "output": "CMakeFiles/tracer_core.dir/src/core/layer_event.cpp.o"
 },
 {
   "directory": "/Users/indr/llm-tracer/build",
-  "command": "/usr/bin/c++  -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/tracer_core.dir/src/core/attention_store.cpp.o -c /Users/indr/llm-tracer/src/core/attention_store.cpp",
+  "command": "/usr/bin/c++ -DGGML_BACKEND_SHARED -DGGML_SHARED -DGGML_USE_BLAS -DGGML_USE_CPU -DGGML_USE_METAL -DLLAMA_SHARED -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -I/Users/indr/llm-tracer/extern/llama.cpp/src/../include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/src/../include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/tracer_core.dir/src/core/attention_store.cpp.o -c /Users/indr/llm-tracer/src/core/attention_store.cpp",
   "file": "/Users/indr/llm-tracer/src/core/attention_store.cpp",
   "output": "CMakeFiles/tracer_core.dir/src/core/attention_store.cpp.o"
+},
+{
+  "directory": "/Users/indr/llm-tracer/build",
+  "command": "/usr/bin/c++ -DGGML_BACKEND_SHARED -DGGML_SHARED -DGGML_USE_BLAS -DGGML_USE_CPU -DGGML_USE_METAL -DLLAMA_SHARED -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -I/Users/indr/llm-tracer/extern/llama.cpp/src/../include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/src/../include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/tracer_core.dir/src/hook/hook_manager.cpp.o -c /Users/indr/llm-tracer/src/hook/hook_manager.cpp",
+  "file": "/Users/indr/llm-tracer/src/hook/hook_manager.cpp",
+  "output": "CMakeFiles/tracer_core.dir/src/hook/hook_manager.cpp.o"
+},
+{
+  "directory": "/Users/indr/llm-tracer/build",
+  "command": "/usr/bin/c++ -DGGML_BACKEND_SHARED -DGGML_SHARED -DGGML_USE_BLAS -DGGML_USE_CPU -DGGML_USE_METAL -DLLAMA_SHARED -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -I/Users/indr/llm-tracer/extern/llama.cpp/src/../include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/src/../include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/tracer_core.dir/src/hook/anomaly_detector.cpp.o -c /Users/indr/llm-tracer/src/hook/anomaly_detector.cpp",
+  "file": "/Users/indr/llm-tracer/src/hook/anomaly_detector.cpp",
+  "output": "CMakeFiles/tracer_core.dir/src/hook/anomaly_detector.cpp.o"
 },
 {
   "directory": "/Users/indr/llm-tracer/build",
@@ -25,7 +37,7 @@
 },
 {
   "directory": "/Users/indr/llm-tracer/build",
-  "command": "/usr/bin/c++  -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/test_ring_buffer.dir/tests/test_ring_buffer.cpp.o -c /Users/indr/llm-tracer/tests/test_ring_buffer.cpp",
+  "command": "/usr/bin/c++ -DGGML_BACKEND_SHARED -DGGML_SHARED -DGGML_USE_BLAS -DGGML_USE_CPU -DGGML_USE_METAL -DLLAMA_SHARED -I/Users/indr/llm-tracer/include -I/Users/indr/llm-tracer/extern/llama.cpp/include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/include -I/Users/indr/llm-tracer/extern/llama.cpp/src/../include -I/Users/indr/llm-tracer/extern/llama.cpp/ggml/src/../include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -o CMakeFiles/test_ring_buffer.dir/tests/test_ring_buffer.cpp.o -c /Users/indr/llm-tracer/tests/test_ring_buffer.cpp",
   "file": "/Users/indr/llm-tracer/tests/test_ring_buffer.cpp",
   "output": "CMakeFiles/test_ring_buffer.dir/tests/test_ring_buffer.cpp.o"
 },
