@@ -29,7 +29,9 @@ void AnomalyDetector::check(LayerEvent& ev, bool is_gpu_run) {
         bool on_cpu = (ev.compute_device.find("CPU") != std::string::npos &&
                        ev.compute_device.find("GPU") == std::string::npos &&
                        ev.compute_device != "Metal (M5)");
-        if (on_cpu) {
+        // Embedding lookup is always CPU-mapped (mmap weights) — not a real fallback
+        bool is_embed = (ev.layer_type == "Embedding" || ev.layer_name == "embd");
+        if (on_cpu && !is_embed) {
             ev.has_anomaly = true;
             ev.anomaly_msg = "✖ CPU fallback: " + ev.layer_name
                            + " ran on CPU (GPU expected)";

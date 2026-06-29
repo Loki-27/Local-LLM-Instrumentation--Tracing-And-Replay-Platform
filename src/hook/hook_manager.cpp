@@ -72,57 +72,161 @@ void HookManager::on_tensor_start(ggml_tensor* t) {
 
 // ── on_tensor_ready (ask=false) ───────────────────────────────────────────────
 
+
+
+
 void HookManager::on_tensor_ready(ggml_tensor* t) {
 
-    // ── Build LayerEvent ───────────────────────────────────────────────────────
+    // ── Build LayerEvent ──────────────────────────────────────────────────────
     LayerEvent ev;
     ev.id         = event_id_++;
     ev.layer_name = t->name;
     ev.layer_type = classify_layer(t->name);
     ev.timestamp  = std::chrono::system_clock::now();
 
-    // ── Latency ────────────────────────────────────────────────────────────────
+    // ── Latency ───────────────────────────────────────────────────────────────
     auto it = timers_.find(t->name);
     if (it != timers_.end()) {
-        auto now     = std::chrono::high_resolution_clock::now();
+        auto now      = std::chrono::high_resolution_clock::now();
         ev.latency_ms = std::chrono::duration<float, std::milli>(
                             now - it->second).count();
         timers_.erase(it);
     }
 
-    // ── Tensor metadata ────────────────────────────────────────────────────────
+    // ── Tensor metadata ───────────────────────────────────────────────────────
     ev.shape = { t->ne[0], t->ne[1], t->ne[2], t->ne[3] };
     ev.dtype = ggml_type_name(t->type);
 
-    // ── Device detection ───────────────────────────────────────────────────────
+    // ── Device detection ──────────────────────────────────────────────────────
     ev.compute_device = detect_device(t);
 
-    // Track whether this is a GPU run (first non-host tensor sets the flag)
     if (!is_gpu_run_.load()) {
-        if (t->buffer && !ggml_backend_buffer_is_host(t->buffer)) {
+        if (t->buffer && !ggml_backend_buffer_is_host(t->buffer))
             is_gpu_run_.store(true);
+    }
+
+    // ── Attention matrix capture ──────────────────────────────────────────────
+    // With flash_attn=false, softmax output is a separate named tensor.
+    // ggml_backend_tensor_get handles Metal→CPU copy safely.
+    {
+        std::string name = t->name;
+        bool is_attn_weights =
+            name.find("KQ_soft_max") != std::string::npos ||
+            name.find("kq_soft_max") != std::string::npos ||
+            name.find("KQV")         != std::string::npos;
+
+        if (is_attn_weights && t->data && t->type == GGML_TYPE_F32) {
+            size_t n_elems = static_cast<size_t>(ggml_nelements(t));
+            size_t n_bytes = ggml_nbytes(t);
+            std::vector<float> cpu_buf(n_elems);
+
+            // Works for both CPU and Metal tensors — GGML handles the sync
+            ggml_backend_tensor_get(t, cpu_buf.data(), 0, n_bytes);
+
+            // t->ne: [n_kv, n_queries, n_heads, 1]
+            int64_t n_kv      = t->ne[0];
+            int64_t n_queries = t->ne[1];
+            int64_t n_heads   = t->ne[2];
+
+            if (n_kv > 0 && n_queries > 0 && n_heads > 0) {
+                // Extract head 0 only (cap size to avoid huge matrices)
+                int64_t kv_cap = std::min(n_kv,      (int64_t)64);
+                int64_t q_cap  = std::min(n_queries,  (int64_t)64);
+
+                std::vector<std::vector<float>> matrix(q_cap,
+                    std::vector<float>(kv_cap, 0.0f));
+
+                for (int64_t q = 0; q < q_cap; q++) {
+                    for (int64_t k = 0; k < kv_cap; k++) {
+                        // head 0: offset = q * n_kv + k
+                        size_t idx = static_cast<size_t>(q * n_kv + k);
+                        if (idx < n_elems)
+                            matrix[q][k] = cpu_buf[idx];
+                    }
+                }
+
+                // Placeholder token labels (real tokens need vocab access)
+                std::vector<std::string> labels;
+                for (int64_t i = 0; i < kv_cap; i++)
+                    labels.push_back("[" + std::to_string(i) + "]");
+
+                attn_store_.store(matrix, labels, t->name, 0);
+            }
         }
     }
 
-    // ── Float statistics ───────────────────────────────────────────────────────
-    // ONLY safe for CPU host memory. Metal/CUDA tensors: skip, mark invalid.
+    // ── Float statistics ──────────────────────────────────────────────────────
     bool is_host = t->buffer && ggml_backend_buffer_is_host(t->buffer);
     if (is_host && t->data && ggml_nelements(t) > 0) {
         compute_stats(t, ev);
         ev.stats_valid = true;
     } else {
-        ev.stats_valid    = false;
-        ev.sparsity_rate  = -1.0f;
-        ev.mean           = -1.0f;
-        ev.max_val        = -1.0f;
+        ev.stats_valid   = false;
+        ev.sparsity_rate = -1.0f;
+        ev.mean          = -1.0f;
+        ev.max_val       = -1.0f;
     }
 
-    // ── Anomaly check ──────────────────────────────────────────────────────────
+    // ── Anomaly check ─────────────────────────────────────────────────────────
     AnomalyDetector::check(ev, is_gpu_run_.load());
 
-    // ── Push to ring buffer ────────────────────────────────────────────────────
+    // ── Push to ring buffer ───────────────────────────────────────────────────
     ring_.push(std::move(ev));
 }
+
+
+// void HookManager::on_tensor_ready(ggml_tensor* t) {
+
+
+//     // ── Build LayerEvent ───────────────────────────────────────────────────────
+//     LayerEvent ev;
+//     ev.id         = event_id_++;
+//     ev.layer_name = t->name;
+//     ev.layer_type = classify_layer(t->name);
+//     ev.timestamp  = std::chrono::system_clock::now();
+
+//     // ── Latency ────────────────────────────────────────────────────────────────
+//     auto it = timers_.find(t->name);
+//     if (it != timers_.end()) {
+//         auto now     = std::chrono::high_resolution_clock::now();
+//         ev.latency_ms = std::chrono::duration<float, std::milli>(
+//                             now - it->second).count();
+//         timers_.erase(it);
+//     }
+
+//     // ── Tensor metadata ────────────────────────────────────────────────────────
+//     ev.shape = { t->ne[0], t->ne[1], t->ne[2], t->ne[3] };
+//     ev.dtype = ggml_type_name(t->type);
+
+//     // ── Device detection ───────────────────────────────────────────────────────
+//     ev.compute_device = detect_device(t);
+
+//     // Track whether this is a GPU run (first non-host tensor sets the flag)
+//     if (!is_gpu_run_.load()) {
+//         if (t->buffer && !ggml_backend_buffer_is_host(t->buffer)) {
+//             is_gpu_run_.store(true);
+//         }
+//     }
+
+//     // ── Float statistics ───────────────────────────────────────────────────────
+//     // ONLY safe for CPU host memory. Metal/CUDA tensors: skip, mark invalid.
+//     bool is_host = t->buffer && ggml_backend_buffer_is_host(t->buffer);
+//     if (is_host && t->data && ggml_nelements(t) > 0) {
+//         compute_stats(t, ev);
+//         ev.stats_valid = true;
+//     } else {
+//         ev.stats_valid    = false;
+//         ev.sparsity_rate  = -1.0f;
+//         ev.mean           = -1.0f;
+//         ev.max_val        = -1.0f;
+//     }
+
+//     // ── Anomaly check ──────────────────────────────────────────────────────────
+//     AnomalyDetector::check(ev, is_gpu_run_.load());
+
+//     // ── Push to ring buffer ────────────────────────────────────────────────────
+//     ring_.push(std::move(ev));
+// }
 
 // ── classify_layer ────────────────────────────────────────────────────────────
 
