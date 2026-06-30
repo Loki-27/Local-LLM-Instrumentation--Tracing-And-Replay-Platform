@@ -3,7 +3,7 @@ project(llm_tracer CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)      # lets clangd / IDEs find headers
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)    
 
 # ── llama.cpp build flags ────────────────────────────────────────────────────
 # Turn off everything we don't need so the build stays fast
@@ -17,7 +17,6 @@ if(APPLE)
     set(GGML_METAL ON CACHE BOOL "" FORCE)
 endif()
 
-# NVIDIA GPU: uncomment if you have CUDA
 # set(GGML_CUDA ON CACHE BOOL "" FORCE)
 
 add_subdirectory(extern/llama.cpp)
