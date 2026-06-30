@@ -41,7 +41,7 @@ static void print_usage(const char* prog) {
 
 int main(int argc, char** argv) {
 
-    // ── Parse CLI ─────────────────────────────────────────────────────────────
+    
     std::string model_path;
     std::string prompt =
         "The transformer architecture works by";
