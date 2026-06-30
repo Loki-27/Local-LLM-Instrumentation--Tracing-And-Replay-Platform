@@ -3,6 +3,9 @@
 A lightweight diagnostic tool that hooks non-invasively into a local transformer model (via llama.cpp) and captures real-time intermediate states — layer latencies, activation stats, attention matrices — displayed in an interactive terminal UI.
 
 Built in C++ for GDSC IIT Roorkee Open Projects Summer '26.
+#Team
+- Team  - LLM_11
+- Teammates - Krishan And Indra
 
 ---
 
